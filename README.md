@@ -46,3 +46,23 @@ Open `Company_bankruptcy_prediction.ipynb` in Google Colab and upload the source
 
 ## Portfolio progression
 AI-PM-CT Project 02: classification after NYC Taxi regression, before NLP and LLM projects.
+
+## November 2026: training-only cross-validation (preliminary)
+Using the supplied 6,819-row dataset, we reserved a stratified 20% test split (1,364 rows, including 44 bankrupt companies). **The following scores are 3-fold cross-validation means on the 80% training partition only**; they are not final test results. SMOTE was applied inside each training fold, never to validation folds. All 95 features were retained for this initial six-model comparison.
+
+| Model | SMOTE | Recall | Precision | F1 | Average precision (PR-AUC summary) |
+|---|---|---:|---:|---:|---:|
+| Logistic Regression | No | .227 | .520 | .316 | .342 |
+| Logistic Regression | Yes | .749 | .184 | .296 | .322 |
+| KNN | No | .159 | .690 | .256 | .227 |
+| KNN | Yes | .693 | .173 | .276 | .171 |
+| Decision Tree | No | .346 | .318 | .330 | .131 |
+| Decision Tree | Yes | .431 | .241 | .307 | .123 |
+| MLP | No | .130 | .383 | .184 | .268 |
+| MLP | Yes | .449 | .302 | .358 | .296 |
+| Random Forest | No | .154 | .638 | .246 | .408 |
+| Random Forest | Yes | .460 | .327 | .382 | .362 |
+| Histogram-based Gradient Boosting | No | .199 | .581 | .296 | .453 |
+| Histogram-based Gradient Boosting | Yes | .426 | .401 | .413 | .412 |
+
+**Important:** The new validation uses `HistGradientBoostingClassifier`, which is not the same estimator as the original notebook's `GradientBoostingClassifier`. This is an exploratory alternative, not a direct replication. For scaled models, standardization is learned inside each fold. These are default-threshold metrics, not tuned deployment metrics. The original notebook has not been rerun end-to-end; no final model or threshold has been approved. A reproducible validation script and subsequent held-out evaluation are still needed. Dataset redistribution rights have not been verified, so the uploaded CSV is not committed.
