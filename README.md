@@ -66,3 +66,36 @@ Using the supplied 6,819-row dataset, we reserved a stratified 20% test split (1
 | Histogram-based Gradient Boosting | Yes | .426 | .401 | .413 | .412 |
 
 **Important:** The new validation uses `HistGradientBoostingClassifier`, which is not the same estimator as the original notebook's `GradientBoostingClassifier`. This is an exploratory alternative, not a direct replication. For scaled models, standardization is learned inside each fold. These are default-threshold metrics, not tuned deployment metrics. The original notebook has not been rerun end-to-end; no final model or threshold has been approved. A reproducible validation script and subsequent held-out evaluation are still needed. Dataset redistribution rights have not been verified, so the uploaded CSV is not committed.
+
+
+## Reproducible six-model validation (6 November 2026)
+Run `python validate_models.py "/path/to/Dataset.csv"`. The source CSV is **not committed**. The script performs a stratified 80/20 split (random_state=42), 3-fold stratified cross-validation on the training portion, scaling where appropriate, and SMOTE only within training folds. It selects the highest mean cross-validation F1 (average precision as tie-breaker), refits on all training records, then evaluates once on the held-out 20%.
+
+**Training-only 3-fold cross-validation, with SMOTE:**
+
+| Classifier | Recall | F1 | Average precision |
+|---|---:|---:|---:|
+| Logistic Regression | 0.749 | 0.296 | 0.322 |
+| KNN | 0.693 | 0.276 | 0.171 |
+| Decision Tree | 0.431 | 0.307 | 0.123 |
+| MLP | 0.449 | 0.358 | 0.296 |
+| Random Forest | 0.460 | 0.382 | 0.362 |
+| Histogram Gradient Boosting | 0.426 | **0.413** | **0.412** |
+
+**Selected model:** Histogram Gradient Boosting with SMOTE (highest cross-validated F1 across all tested configurations).
+
+**Final held-out evaluation (1,364 records, including 44 bankrupt):**
+
+| Metric | Result |
+|---|---:|
+| Accuracy | 0.9611 |
+| Precision (bankrupt) | 0.4237 |
+| Recall (bankrupt) | 0.5682 |
+| F1 (bankrupt) | 0.4854 |
+| Average precision | 0.5220 |
+| True negatives / false positives | 1286 / 34 |
+| False negatives / true positives | 19 / 25 |
+
+**Interpretation:** 25 of 44 bankrupt companies were detected; 19 were missed. This is an experimental screening model, not a production-grade credit or bankruptcy decision system. A different threshold or business cost objective may change the preferred model.
+
+**Caveats:** This script uses all 95 input features rather than the notebook's 74-feature correlation-reduced path. The histogram-based boosting estimator differs from the notebook's original gradient boosting implementation. The existing notebook has not been fully rerun; its historical metrics should not be confused with these separately validated script results. Dataset provenance, dependency pinning, threshold calibration, external validation and monitoring remain outstanding.
