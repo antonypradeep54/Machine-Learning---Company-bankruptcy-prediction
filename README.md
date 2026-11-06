@@ -46,3 +46,56 @@ Open `Company_bankruptcy_prediction.ipynb` in Google Colab and upload the source
 
 ## Portfolio progression
 AI-PM-CT Project 02: classification after NYC Taxi regression, before NLP and LLM projects.
+
+## November 2026: training-only cross-validation (preliminary)
+Using the supplied 6,819-row dataset, we reserved a stratified 20% test split (1,364 rows, including 44 bankrupt companies). **The following scores are 3-fold cross-validation means on the 80% training partition only**; they are not final test results. SMOTE was applied inside each training fold, never to validation folds. All 95 features were retained for this initial six-model comparison.
+
+| Model | SMOTE | Recall | Precision | F1 | Average precision (PR-AUC summary) |
+|---|---|---:|---:|---:|---:|
+| Logistic Regression | No | .227 | .520 | .316 | .342 |
+| Logistic Regression | Yes | .749 | .184 | .296 | .322 |
+| KNN | No | .159 | .690 | .256 | .227 |
+| KNN | Yes | .693 | .173 | .276 | .171 |
+| Decision Tree | No | .346 | .318 | .330 | .131 |
+| Decision Tree | Yes | .431 | .241 | .307 | .123 |
+| MLP | No | .130 | .383 | .184 | .268 |
+| MLP | Yes | .449 | .302 | .358 | .296 |
+| Random Forest | No | .154 | .638 | .246 | .408 |
+| Random Forest | Yes | .460 | .327 | .382 | .362 |
+| Histogram-based Gradient Boosting | No | .199 | .581 | .296 | .453 |
+| Histogram-based Gradient Boosting | Yes | .426 | .401 | .413 | .412 |
+
+**Important:** The new validation uses `HistGradientBoostingClassifier`, which is not the same estimator as the original notebook's `GradientBoostingClassifier`. This is an exploratory alternative, not a direct replication. For scaled models, standardization is learned inside each fold. These are default-threshold metrics, not tuned deployment metrics. The original notebook has not been rerun end-to-end; no final model or threshold has been approved. A reproducible validation script and subsequent held-out evaluation are still needed. Dataset redistribution rights have not been verified, so the uploaded CSV is not committed.
+
+
+## Reproducible six-model validation (6 November 2026)
+Run `python validate_models.py "/path/to/Dataset.csv"`. The source CSV is **not committed**. The script performs a stratified 80/20 split (random_state=42), 3-fold stratified cross-validation on the training portion, scaling where appropriate, and SMOTE only within training folds. It selects the highest mean cross-validation F1 (average precision as tie-breaker), refits on all training records, then evaluates once on the held-out 20%.
+
+**Training-only 3-fold cross-validation, with SMOTE:**
+
+| Classifier | Recall | F1 | Average precision |
+|---|---:|---:|---:|
+| Logistic Regression | 0.749 | 0.296 | 0.322 |
+| KNN | 0.693 | 0.276 | 0.171 |
+| Decision Tree | 0.431 | 0.307 | 0.123 |
+| MLP | 0.449 | 0.358 | 0.296 |
+| Random Forest | 0.460 | 0.382 | 0.362 |
+| Histogram Gradient Boosting | 0.426 | **0.413** | **0.412** |
+
+**Selected model:** Histogram Gradient Boosting with SMOTE (highest cross-validated F1 across all tested configurations).
+
+**Final held-out evaluation (1,364 records, including 44 bankrupt):**
+
+| Metric | Result |
+|---|---:|
+| Accuracy | 0.9611 |
+| Precision (bankrupt) | 0.4237 |
+| Recall (bankrupt) | 0.5682 |
+| F1 (bankrupt) | 0.4854 |
+| Average precision | 0.5220 |
+| True negatives / false positives | 1286 / 34 |
+| False negatives / true positives | 19 / 25 |
+
+**Interpretation:** 25 of 44 bankrupt companies were detected; 19 were missed. This is an experimental screening model, not a production-grade credit or bankruptcy decision system. A different threshold or business cost objective may change the preferred model.
+
+**Caveats:** This script uses all 95 input features rather than the notebook's 74-feature correlation-reduced path. The histogram-based boosting estimator differs from the notebook's original gradient boosting implementation. The existing notebook has not been fully rerun; its historical metrics should not be confused with these separately validated script results. Dataset provenance, dependency pinning, threshold calibration, external validation and monitoring remain outstanding.
