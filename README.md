@@ -99,3 +99,9 @@ Run `python validate_models.py "/path/to/Dataset.csv"`. The source CSV is **not 
 **Interpretation:** 25 of 44 bankrupt companies were detected; 19 were missed. This is an experimental screening model, not a production-grade credit or bankruptcy decision system. A different threshold or business cost objective may change the preferred model.
 
 **Caveats:** This script uses all 95 input features rather than the notebook's 74-feature correlation-reduced path. The histogram-based boosting estimator differs from the notebook's original gradient boosting implementation. The existing notebook has not been fully rerun; its historical metrics should not be confused with these separately validated script results. Dataset provenance, dependency pinning, threshold calibration, external validation and monitoring remain outstanding.
+
+## Public dataset and attribution
+
+The course-provided dataset has 6,819 rows, 95 financial features and a `Bankrupt?` target. Its structure matches the [UCI Taiwanese Bankruptcy Prediction dataset](https://archive.ics.uci.edu/dataset/572/taiwanese+bankruptcy+prediction), which is distributed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Credit: UCI Machine Learning Repository and the original dataset creators; see the UCI record for the recommended citation.
+
+**Before merging this change:** verify the course CSV is equivalent to the UCI-distributed version and upload the redistributable CSV to `dataset/Dataset - Company Bankruptcy.csv` on this pull-request branch. The notebook is configured to read the CSV from the repository's `main` branch after merging. Until the CSV is added and the pull request merged, this URL will not work. The original course-provided file has not been uploaded by the automated changes.
